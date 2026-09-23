@@ -1,0 +1,1055 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#f7c948" />
+  <meta name="description" content="Aylık gider ve ödeme takip uygulaması" />
+  <link rel="manifest" href="manifest.json" />
+  <title>Ödeme Takip</title>
+
+  <style>
+    :root {
+      --bg: #f5f6f8;
+      --card: #ffffff;
+      --text: #17202a;
+      --muted: #7c8794;
+      --line: #e7eaf0;
+      --yellow: #f7c948;
+      --yellow-soft: #fff5c2;
+      --green: #18b86a;
+      --green-soft: #e7f8ef;
+      --red: #e84d5b;
+      --red-soft: #ffeaed;
+      --orange: #f39c33;
+      --orange-soft: #fff2df;
+      --shadow: 0 8px 25px rgba(20, 30, 45, .07);
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    button, input, select, textarea {
+      font: inherit;
+    }
+
+    button {
+      border: 0;
+      cursor: pointer;
+    }
+
+    .app {
+      width: min(100%, 680px);
+      min-height: 100vh;
+      margin: auto;
+      padding-bottom: 92px;
+    }
+
+    .topbar {
+      padding: 22px 18px 18px;
+      background: linear-gradient(135deg, #f9d86a, #f7c948);
+      border-radius: 0 0 28px 28px;
+    }
+
+    .topline {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .brand {
+      font-weight: 800;
+      font-size: 21px;
+      letter-spacing: -.5px;
+    }
+
+    .brand small {
+      display: block;
+      font-size: 11px;
+      font-weight: 600;
+      opacity: .65;
+      margin-top: 3px;
+    }
+
+    .icon-button {
+      width: 38px;
+      height: 38px;
+      border-radius: 13px;
+      background: rgba(255,255,255,.5);
+      color: var(--text);
+      font-size: 19px;
+    }
+
+    .month-selector {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 24px;
+    }
+
+    .month-selector h1 {
+      margin: 0;
+      font-size: 25px;
+      letter-spacing: -.8px;
+    }
+
+    .month-arrows {
+      display: flex;
+      gap: 8px;
+    }
+
+    .month-arrows button {
+      width: 36px;
+      height: 36px;
+      border-radius: 12px;
+      background: rgba(255,255,255,.55);
+      font-size: 20px;
+    }
+
+    main {
+      padding: 18px;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .summary-card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 16px;
+      box-shadow: var(--shadow);
+    }
+
+    .summary-card.total {
+      grid-column: 1 / -1;
+      background: var(--text);
+      color: white;
+    }
+
+    .summary-label {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+    }
+
+    .total .summary-label {
+      color: rgba(255,255,255,.65);
+    }
+
+    .summary-amount {
+      font-size: 26px;
+      font-weight: 850;
+      margin-top: 7px;
+      letter-spacing: -.8px;
+    }
+
+    .total .summary-amount {
+      color: var(--yellow);
+      font-size: 32px;
+    }
+
+    .summary-info {
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 8px;
+    }
+
+    .section {
+      margin-top: 25px;
+    }
+
+    .section-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 11px;
+    }
+
+    .section-title h2 {
+      margin: 0;
+      font-size: 17px;
+      letter-spacing: -.3px;
+    }
+
+    .section-title span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .upcoming-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .upcoming-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 13px;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-left: 4px solid var(--orange);
+      border-radius: 16px;
+      box-shadow: 0 4px 15px rgba(20,30,45,.04);
+    }
+
+    .upcoming-item.late {
+      border-left-color: var(--red);
+    }
+
+    .bill-icon {
+      width: 40px;
+      height: 40px;
+      display: grid;
+      place-items: center;
+      border-radius: 13px;
+      background: var(--orange-soft);
+      font-size: 19px;
+      flex: 0 0 auto;
+    }
+
+    .late .bill-icon {
+      background: var(--red-soft);
+    }
+
+    .upcoming-main {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .upcoming-name {
+      font-weight: 750;
+      font-size: 14px;
+    }
+
+    .upcoming-date {
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 3px;
+    }
+
+    .upcoming-amount {
+      font-weight: 800;
+      font-size: 14px;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 9px;
+      margin-bottom: 12px;
+    }
+
+    .filter-select {
+      flex: 1;
+      min-width: 0;
+      padding: 11px 12px;
+      border: 1px solid var(--line);
+      background: white;
+      color: var(--text);
+      border-radius: 13px;
+      outline: none;
+    }
+
+    .add-button {
+      padding: 11px 15px;
+      border-radius: 13px;
+      background: var(--yellow);
+      color: var(--text);
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .expense-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .expense-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 17px;
+      box-shadow: 0 4px 15px rgba(20,30,45,.035);
+    }
+
+    .expense-card.paid {
+      opacity: .72;
+    }
+
+    .category-icon {
+      width: 42px;
+      height: 42px;
+      display: grid;
+      place-items: center;
+      flex: 0 0 auto;
+      border-radius: 14px;
+      background: #f0f2f5;
+      font-size: 19px;
+    }
+
+    .expense-content {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .expense-name {
+      font-weight: 750;
+      font-size: 14px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .expense-meta {
+      display: flex;
+      gap: 5px;
+      align-items: center;
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 5px;
+      flex-wrap: wrap;
+    }
+
+    .expense-amount {
+      font-weight: 800;
+      font-size: 14px;
+      text-align: right;
+    }
+
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 7px;
+      border-radius: 7px;
+      font-size: 10px;
+      font-weight: 800;
+    }
+
+    .status.paid {
+      color: #098950;
+      background: var(--green-soft);
+    }
+
+    .status.pending {
+      color: #bd720d;
+      background: var(--orange-soft);
+    }
+
+    .status.late {
+      color: #c52d3c;
+      background: var(--red-soft);
+    }
+
+    .quick-pay {
+      margin-top: 7px;
+      padding: 6px 8px;
+      border-radius: 8px;
+      background: var(--green);
+      color: white;
+      font-size: 10px;
+      font-weight: 800;
+    }
+
+    .paid .quick-pay {
+      background: transparent;
+      color: var(--green);
+      padding: 0;
+    }
+
+    .empty {
+      padding: 32px 15px;
+      text-align: center;
+      color: var(--muted);
+      background: var(--card);
+      border: 1px dashed var(--line);
+      border-radius: 17px;
+    }
+
+    .fab {
+      position: fixed;
+      z-index: 4;
+      right: max(20px, calc((100vw - 680px) / 2 + 20px));
+      bottom: 78px;
+      width: 58px;
+      height: 58px;
+      border-radius: 19px;
+      background: var(--text);
+      color: var(--yellow);
+      font-size: 28px;
+      box-shadow: 0 8px 20px rgba(0,0,0,.2);
+    }
+
+    .bottom-nav {
+      position: fixed;
+      z-index: 3;
+      left: 50%;
+      bottom: 0;
+      transform: translateX(-50%);
+      width: min(100%, 680px);
+      display: flex;
+      justify-content: space-around;
+      padding: 11px 8px calc(11px + env(safe-area-inset-bottom));
+      background: rgba(255,255,255,.94);
+      border-top: 1px solid var(--line);
+      backdrop-filter: blur(14px);
+    }
+
+    .nav-item {
+      display: grid;
+      gap: 3px;
+      justify-items: center;
+      color: var(--muted);
+      background: transparent;
+      font-size: 10px;
+      font-weight: 700;
+    }
+
+    .nav-item strong {
+      font-size: 20px;
+      line-height: 20px;
+    }
+
+    .nav-item.active {
+      color: var(--text);
+    }
+
+    .modal-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 10;
+      padding: 18px;
+      background: rgba(15, 22, 31, .48);
+      align-items: end;
+      justify-content: center;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal {
+      width: min(100%, 560px);
+      max-height: 92vh;
+      overflow: auto;
+      padding: 22px;
+      background: var(--card);
+      border-radius: 25px 25px 18px 18px;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+    }
+
+    .modal-header h2 {
+      margin: 0;
+      font-size: 20px;
+    }
+
+    .close-button {
+      width: 34px;
+      height: 34px;
+      border-radius: 11px;
+      background: #f0f2f5;
+      font-size: 18px;
+    }
+
+    .form-group {
+      margin-top: 13px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 750;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      color: var(--text);
+      outline: none;
+      background: white;
+    }
+
+    .form-group textarea {
+      min-height: 74px;
+      resize: vertical;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      border-color: var(--yellow);
+      box-shadow: 0 0 0 3px var(--yellow-soft);
+    }
+
+    .form-actions {
+      display: flex;
+      gap: 9px;
+      margin-top: 21px;
+    }
+
+    .save-button {
+      flex: 1;
+      padding: 13px;
+      border-radius: 13px;
+      background: var(--text);
+      color: white;
+      font-weight: 800;
+    }
+
+    .delete-button {
+      padding: 13px;
+      border-radius: 13px;
+      background: var(--red-soft);
+      color: var(--red);
+      font-weight: 800;
+    }
+
+    .toast {
+      position: fixed;
+      z-index: 20;
+      left: 50%;
+      bottom: 145px;
+      transform: translate(-50%, 20px);
+      padding: 12px 16px;
+      border-radius: 12px;
+      background: var(--text);
+      color: white;
+      font-size: 13px;
+      opacity: 0;
+      pointer-events: none;
+      transition: .25s;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+
+    @media (min-width: 680px) {
+      .topbar {
+        border-radius: 0 0 30px 30px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="topline">
+        <div class="brand">
+          Ödeme Takip
+          <small>Aylık gider yönetimi</small>
+        </div>
+        <button class="icon-button" id="themeButton" title="Tema değiştir">☾</button>
+      </div>
+
+      <div class="month-selector">
+        <h1 id="monthTitle">Eylül 2026</h1>
+        <div class="month-arrows">
+          <button id="previousMonth">‹</button>
+          <button id="nextMonth">›</button>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="summary-grid">
+        <div class="summary-card total">
+          <div class="summary-label">Toplam gider</div>
+          <div class="summary-amount" id="totalAmount">₺0</div>
+          <div class="summary-info" id="summaryInfo">0 gider kaydı</div>
+        </div>
+
+        <div class="summary-card">
+          <div class="summary-label">Ödenen</div>
+          <div class="summary-amount" id="paidAmount">₺0</div>
+        </div>
+
+        <div class="summary-card">
+          <div class="summary-label">Kalan</div>
+          <div class="summary-amount" id="remainingAmount">₺0</div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-title">
+          <h2>Yaklaşan ödemeler</h2>
+          <span id="pendingCount">0 bekliyor</span>
+        </div>
+        <div class="upcoming-list" id="upcomingList"></div>
+      </section>
+
+      <section class="section">
+        <div class="section-title">
+          <h2>Tüm giderler</h2>
+          <span id="expenseCount">0 kayıt</span>
+        </div>
+
+        <div class="toolbar">
+          <select class="filter-select" id="filterSelect">
+            <option value="all">Tüm giderler</option>
+            <option value="pending">Bekleyenler</option>
+            <option value="paid">Ödenenler</option>
+            <option value="late">Gecikenler</option>
+          </select>
+          <button class="add-button" id="addButton">＋ Ekle</button>
+        </div>
+
+        <div class="expense-list" id="expenseList"></div>
+      </section>
+    </main>
+
+    <button class="fab" id="fabButton">＋</button>
+
+    <nav class="bottom-nav">
+      <button class="nav-item active">
+        <strong>⌂</strong>
+        Özet
+      </button>
+      <button class="nav-item" id="navExpenses">
+        <strong>☷</strong>
+        Giderler
+      </button>
+      <button class="nav-item">
+        <strong>⚙</strong>
+        Ayarlar
+      </button>
+    </nav>
+  </div>
+
+  <div class="modal-backdrop" id="modalBackdrop">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="modalTitle">Yeni gider ekle</h2>
+        <button class="close-button" id="closeModal">×</button>
+      </div>
+
+      <form id="expenseForm">
+        <input type="hidden" id="expenseId" />
+
+        <div class="form-group">
+          <label for="expenseName">Gider adı</label>
+          <input id="expenseName" required placeholder="Örn. Elektrik" />
+        </div>
+
+        <div class="form-group">
+          <label for="expenseAmount">Tutar</label>
+          <input id="expenseAmount" required type="number" min="0" step="0.01" placeholder="Örn. 625" />
+        </div>
+
+        <div class="form-group">
+          <label for="expenseDate">Son ödeme tarihi</label>
+          <input id="expenseDate" required type="date" />
+        </div>
+
+        <div class="form-group">
+          <label for="expenseCategory">Kategori</label>
+          <select id="expenseCategory">
+            <option value="🏠">🏠 Ev</option>
+            <option value="💳">💳 Kredi kartı</option>
+            <option value="📱">📱 Telefon / İnternet</option>
+            <option value="💡">💡 Fatura</option>
+            <option value="🛒">🛒 Alışveriş</option>
+            <option value="📌">📌 Diğer</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="expenseRepeat">Tekrarlama</label>
+          <select id="expenseRepeat">
+            <option value="none">Tekrarlamıyor</option>
+            <option value="monthly">Her ay</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="expenseNote">Not</label>
+          <textarea id="expenseNote" placeholder="İsteğe bağlı not"></textarea>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="save-button">Kaydet</button>
+          <button type="button" class="delete-button" id="deleteButton" hidden>Sil</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const STORAGE_KEY = "odeme-takip-expenses-v1";
+    const MONTH_KEY = "odeme-takip-month-v1";
+
+    const seedExpenses = [
+      { id: crypto.randomUUID(), name: "Vodafone", amount: 232, date: "2026-09-04", paid: true, category: "📱", repeat: "monthly", note: "" },
+      { id: crypto.randomUUID(), name: "Kredi Kartı - Yapı Kredi", amount: 762, date: "2026-09-05", paid: true, category: "💳", repeat: "monthly", note: "" },
+      { id: crypto.randomUUID(), name: "Kira", amount: 16000, date: "2026-09-10", paid: true, category: "🏠", repeat: "monthly", note: "" },
+      { id: crypto.randomUUID(), name: "İnternet", amount: 830, date: "2026-09-14", paid: true, category: "📱", repeat: "monthly", note: "" },
+      { id: crypto.randomUUID(), name: "Kredi Kartı - Enpara", amount: 2748, date: "2026-09-18", paid: true, category: "💳", repeat: "monthly", note: "" },
+      { id: crypto.randomUUID(), name: "Doğalgaz", amount: 565, date: "2026-09-25", paid: false, category: "💡", repeat: "monthly", note: "" },
+      { id: crypto.randomUUID(), name: "Su", amount: 448, date: "2026-09-25", paid: false, category: "💡", repeat: "monthly", note: "" },
+      { id: crypto.randomUUID(), name: "Elektrik", amount: 625, date: "2026-09-28", paid: false, category: "💡", repeat: "monthly", note: "" }
+    ];
+
+    let expenses = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null") || seedExpenses;
+    let selectedMonth = localStorage.getItem(MONTH_KEY) || "2026-09";
+
+    const $ = id => document.getElementById(id);
+
+    const money = value => new Intl.NumberFormat("tr-TR", {
+      style: "currency",
+      currency: "TRY",
+      maximumFractionDigits: 0
+    }).format(value);
+
+    const dateObject = iso => {
+      const [year, month, day] = iso.split("-").map(Number);
+      return new Date(year, month - 1, day);
+    };
+
+    const today = () => {
+      const now = new Date();
+      return new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    };
+
+    const daysUntil = iso => Math.ceil((dateObject(iso) - today()) / 86400000);
+
+    const dateText = iso => dateObject(iso).toLocaleDateString("tr-TR", {
+      day: "numeric",
+      month: "long"
+    });
+
+    const monthText = month => {
+      const [year, number] = month.split("-").map(Number);
+      return new Date(year, number - 1, 1).toLocaleDateString("tr-TR", {
+        month: "long",
+        year: "numeric"
+      }).replace(/^./, x => x.toUpperCase());
+    };
+
+    const statusInfo = expense => {
+      if (expense.paid) return {
+        className: "paid",
+        icon: "✓",
+        text: "ÖDENDİ"
+      };
+
+      const days = daysUntil(expense.date);
+
+      if (days < 0) return {
+        className: "late",
+        icon: "!",
+        text: `${Math.abs(days)} gün gecikti`
+      };
+
+      if (days <= 3) return {
+        className: "pending",
+        icon: "⏳",
+        text: `${days} gün kaldı`
+      };
+
+      return {
+        className: "pending",
+        icon: "○",
+        text: "PLANLANDI"
+      };
+    };
+
+    function save() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(expenses));
+      localStorage.setItem(MONTH_KEY, selectedMonth);
+    }
+
+    function getMonthExpenses() {
+      return expenses.filter(item => item.date.startsWith(selectedMonth));
+    }
+
+    function renderSummary(items) {
+      const total = items.reduce((sum, item) => sum + Number(item.amount), 0);
+      const paid = items.filter(item => item.paid)
+        .reduce((sum, item) => sum + Number(item.amount), 0);
+      const remaining = total - paid;
+      const pending = items.filter(item => !item.paid).length;
+
+      $("totalAmount").textContent = money(total);
+      $("paidAmount").textContent = money(paid);
+      $("remainingAmount").textContent = money(remaining);
+      $("summaryInfo").textContent = `${items.length} gider · ${paid ? "Ödeme kaydı mevcut" : "Henüz ödeme yok"}`;
+      $("pendingCount").textContent = `${pending} bekliyor`;
+      $("expenseCount").textContent = `${items.length} kayıt`;
+    }
+
+    function renderUpcoming(items) {
+      const upcoming = items
+        .filter(item => !item.paid)
+        .sort((a, b) => a.date.localeCompare(b.date))
+        .slice(0, 3);
+
+      if (!upcoming.length) {
+        $("upcomingList").innerHTML = `
+          <div class="empty">Bu ay bekleyen ödeme bulunmuyor 🎉</div>
+        `;
+        return;
+      }
+
+      $("upcomingList").innerHTML = upcoming.map(item => {
+        const status = statusInfo(item);
+        return `
+          <div class="upcoming-item ${status.className === "late" ? "late" : ""}"
+               onclick="openEdit('${item.id}')">
+            <div class="bill-icon">${item.category}</div>
+            <div class="upcoming-main">
+              <div class="upcoming-name">${escapeHtml(item.name)}</div>
+              <div class="upcoming-date">${dateText(item.date)} · ${status.text}</div>
+            </div>
+            <div class="upcoming-amount">${money(item.amount)}</div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function renderExpenses(items) {
+      const filter = $("filterSelect").value;
+      let filtered = items.filter(item => {
+        const status = statusInfo(item);
+        if (filter === "paid") return item.paid;
+        if (filter === "pending") return !item.paid;
+        if (filter === "late") return !item.paid && status.className === "late";
+        return true;
+      });
+
+      filtered.sort((a, b) => {
+        if (a.paid !== b.paid) return a.paid ? 1 : -1;
+        return a.date.localeCompare(b.date);
+      });
+
+      if (!filtered.length) {
+        $("expenseList").innerHTML = `
+          <div class="empty">Bu filtreye uygun gider bulunmuyor.</div>
+        `;
+        return;
+      }
+
+      $("expenseList").innerHTML = filtered.map(item => {
+        const status = statusInfo(item);
+        return `
+          <article class="expense-card ${item.paid ? "paid" : ""}">
+            <div class="category-icon">${item.category}</div>
+            <div class="expense-content" onclick="openEdit('${item.id}')">
+              <div class="expense-name">${escapeHtml(item.name)}</div>
+              <div class="expense-meta">
+                <span>${dateText(item.date)}</span>
+                <span>·</span>
+                <span class="status ${status.className}">
+                  ${status.icon} ${status.text}
+                </span>
+              </div>
+            </div>
+            <div>
+              <div class="expense-amount">${money(item.amount)}</div>
+              <button class="quick-pay" onclick="togglePaid('${item.id}')">
+                ${item.paid ? "Ödendi" : "Öde"}
+              </button>
+            </div>
+          </article>
+        `;
+      }).join("");
+    }
+
+    function render() {
+      const items = getMonthExpenses();
+      $("monthTitle").textContent = monthText(selectedMonth);
+      renderSummary(items);
+      renderUpcoming(items);
+      renderExpenses(items);
+      save();
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function openNew() {
+      $("modalTitle").textContent = "Yeni gider ekle";
+      $("expenseId").value = "";
+      $("expenseName").value = "";
+      $("expenseAmount").value = "";
+      $("expenseDate").value = `${selectedMonth}-25`;
+      $("expenseCategory").value = "📌";
+      $("expenseRepeat").value = "none";
+      $("expenseNote").value = "";
+      $("deleteButton").hidden = true;
+      $("modalBackdrop").classList.add("open");
+      setTimeout(() => $("expenseName").focus(), 50);
+    }
+
+    window.openEdit = function(id) {
+      const item = expenses.find(x => x.id === id);
+      if (!item) return;
+
+      $("modalTitle").textContent = "Gideri düzenle";
+      $("expenseId").value = item.id;
+      $("expenseName").value = item.name;
+      $("expenseAmount").value = item.amount;
+      $("expenseDate").value = item.date;
+      $("expenseCategory").value = item.category;
+      $("expenseRepeat").value = item.repeat || "none";
+      $("expenseNote").value = item.note || "";
+      $("deleteButton").hidden = false;
+      $("modalBackdrop").classList.add("open");
+    };
+
+    window.togglePaid = function(id) {
+      event.stopPropagation();
+      const item = expenses.find(x => x.id === id);
+      if (!item) return;
+
+      item.paid = !item.paid;
+      save();
+      render();
+      showToast(item.paid ? "Ödeme tamamlandı" : "Ödeme beklemeye alındı");
+    };
+
+    function closeModal() {
+      $("modalBackdrop").classList.remove("open");
+    }
+
+    function changeMonth(amount) {
+      const [year, month] = selectedMonth.split("-").map(Number);
+      const date = new Date(year, month - 1 + amount, 1);
+      selectedMonth = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+      render();
+    }
+
+    function showToast(message) {
+      $("toast").textContent = message;
+      $("toast").classList.add("show");
+      setTimeout(() => $("toast").classList.remove("show"), 2200);
+    }
+
+    $("expenseForm").addEventListener("submit", event => {
+      event.preventDefault();
+
+      const id = $("expenseId").value;
+      const data = {
+        id: id || crypto.randomUUID(),
+        name: $("expenseName").value.trim(),
+        amount: Number($("expenseAmount").value),
+        date: $("expenseDate").value,
+        paid: id ? expenses.find(x => x.id === id).paid : false,
+        category: $("expenseCategory").value,
+        repeat: $("expenseRepeat").value,
+        note: $("expenseNote").value.trim()
+      };
+
+      if (!data.name || !data.amount || !data.date) return;
+
+      if (id) {
+        expenses = expenses.map(item => item.id === id ? data : item);
+        showToast("Gider güncellendi");
+      } else {
+        expenses.push(data);
+        showToast("Yeni gider eklendi");
+      }
+
+      closeModal();
+      render();
+    });
+
+    $("deleteButton").addEventListener("click", () => {
+      const id = $("expenseId").value;
+      if (!id) return;
+
+      if (confirm("Bu gider silinsin mi?")) {
+        expenses = expenses.filter(item => item.id !== id);
+        closeModal();
+        render();
+        showToast("Gider silindi");
+      }
+    });
+
+    $("closeModal").addEventListener("click", closeModal);
+
+    $("modalBackdrop").addEventListener("click", event => {
+      if (event.target === $("modalBackdrop")) closeModal();
+    });
+
+    $("addButton").addEventListener("click", openNew);
+    $("fabButton").addEventListener("click", openNew);
+    $("previousMonth").addEventListener("click", () => changeMonth(-1));
+    $("nextMonth").addEventListener("click", () => changeMonth(1));
+    $("filterSelect").addEventListener("change", render);
+
+    $("navExpenses").addEventListener("click", () => {
+      document.querySelector(".section:nth-of-type(2)")
+        ?.scrollIntoView({ behavior: "smooth" });
+    });
+
+    $("themeButton").addEventListener("click", () => {
+      const dark = document.body.dataset.theme !== "dark";
+      document.body.dataset.theme = dark ? "dark" : "light";
+      $("themeButton").textContent = dark ? "☀" : "☾";
+
+      if (dark) {
+        document.documentElement.style.setProperty("--bg", "#11161d");
+        document.documentElement.style.setProperty("--card", "#1b222b");
+        document.documentElement.style.setProperty("--text", "#f5f7fa");
+        document.documentElement.style.setProperty("--muted", "#a7b0bb");
+        document.documentElement.style.setProperty("--line", "#303944");
+      } else {
+        document.documentElement.style.setProperty("--bg", "#f5f6f8");
+        document.documentElement.style.setProperty("--card", "#ffffff");
+        document.documentElement.style.setProperty("--text", "#17202a");
+        document.documentElement.style.setProperty("--muted", "#7c8794");
+        document.documentElement.style.setProperty("--line", "#e7eaf0");
+      }
+    });
+
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("sw.js").catch(() => {});
+      });
+    }
+
+    render();
+  </script>
+</body>
+</html>
