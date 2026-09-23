@@ -1,0 +1,19 @@
+{
+  "expenses": [
+    {
+      "id": "test-1",
+      "name": "Test Ödemesi",
+      "amount": 100,
+      "category": "diger",
+      "dueDate": "2026-09-30",
+      "status": "pending",
+      "paidDate": null,
+      "recurring": "monthly",
+      "notes": ""
+    }
+  ],
+  "settings": {
+    "currency": "₺",
+    "monthlyBudget": 0
+  }
+}
