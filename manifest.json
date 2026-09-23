@@ -1,0 +1,11 @@
+{
+  "name": "Ödeme Takip",
+  "short_name": "Ödemeler",
+  "description": "Aylık gider ve ödeme takip uygulaması",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f5f6f8",
+  "theme_color": "#f7c948",
+  "orientation": "portrait",
+  "lang": "tr"
+}
