@@ -1,6 +1,5 @@
 import { useRef, useState } from 'react';
-import { Download, Upload, Trash2, Check, Github } from 'lucide-react';
-import { base44 } from '@/api/base44Client';
+import { Download, Upload, Trash2, Check } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { exportToFile, importFromFile } from '@/lib/paymentStore';
 import { remindersEnabled, setRemindersEnabled, requestReminderPermission } from '@/lib/reminders';
@@ -11,7 +10,6 @@ export default function SettingsView({ data, dark, onToggleDark, updateSettings,
   const [err, setErr] = useState('');
   const [reminders, setReminders] = useState(() => remindersEnabled());
   const [reminderInfo, setReminderInfo] = useState('');
-  const [syncing, setSyncing] = useState(false);
 
   const flash = (m) => { setMsg(m); setErr(''); setTimeout(() => setMsg(''), 2500); };
   const flashErr = (m) => { setErr(m); setMsg(''); };
@@ -43,17 +41,6 @@ export default function SettingsView({ data, dark, onToggleDark, updateSettings,
   };
 
   const handleImportClick = () => fileRef.current?.click();
-
-  const handleGithubSync = async () => {
-    setSyncing(true);
-    try {
-      await base44.functions.invoke('githubSyncPayments', { data });
-      flash('Ödeme verileri GitHub deposuna kaydedildi.');
-    } catch (er) {
-      flashErr(er?.response?.data?.error || er?.message || 'GitHub senkronizasyonu başarısız.');
-    }
-    setSyncing(false);
-  };
 
   const handleFile = async (e) => {
     const file = e.target.files?.[0];
@@ -116,7 +103,7 @@ export default function SettingsView({ data, dark, onToggleDark, updateSettings,
 
       <Section title="Yedekleme">
         <p className="text-xs text-muted-foreground mb-1 leading-relaxed">
-          Verileriniz bu telefonda metin olarak saklanır. Düzenli olarak bir yedek dosyası indirip güvenli bir yerde saklayın; telefonu değiştirirseniz aynı dosyayı içe aktararak geri yükleyebilirsiniz.
+          Verileriniz bu cihazda metin olarak saklanır. Düzenli olarak bir yedek dosyası indirip güvenli bir yerde saklayın; cihaz değiştirirseniz aynı dosyayı içe aktararak geri yükleyebilirsiniz.
         </p>
         <button
           onClick={handleExport}
@@ -136,25 +123,6 @@ export default function SettingsView({ data, dark, onToggleDark, updateSettings,
           <span className="flex-1">
             <span className="block text-sm font-semibold text-foreground">Yedekten geri yükle</span>
             <span className="block text-xs text-muted-foreground">.txt dosyasını içe aktar</span>
-          </span>
-        </button>
-        <button
-          onClick={handleGithubSync}
-          disabled={syncing}
-          className="w-full flex items-center gap-3 p-3.5 rounded-2xl bg-card border border-border shadow-sm hover:bg-muted/60 transition text-left disabled:opacity-60"
-        >
-          <span className="w-10 h-10 grid place-items-center rounded-xl bg-foreground/5 text-foreground">
-            {syncing ? (
-              <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-            ) : (
-              <Github size={18} />
-            )}
-          </span>
-          <span className="flex-1">
-            <span className="block text-sm font-semibold text-foreground">
-              {syncing ? 'GitHub\'a kaydediliyor…' : 'GitHub\'a yedekle'}
-            </span>
-            <span className="block text-xs text-muted-foreground">Ödeme verilerini Mergrad/Odeme-Takip-PWA deposuna kaydet</span>
           </span>
         </button>
         <input ref={fileRef} type="file" accept=".txt,text/plain,application/json" className="hidden" onChange={handleFile} />

@@ -157,7 +157,7 @@ export default function Home() {
               transition={{ duration: 0.2 }}
             >
               <h1 className="font-display text-xl font-extrabold tracking-tight mb-1">Ayarlar</h1>
-              <p className="text-xs text-muted-foreground mb-4">Verileriniz telefonda metin olarak saklanır.</p>
+              <p className="text-xs text-muted-foreground mb-4">Verileriniz cihazınızda metin olarak saklanır.</p>
               <SettingsView
                 data={data}
                 dark={isDark}

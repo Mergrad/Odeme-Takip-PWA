@@ -1,0 +1,18 @@
+{
+  "name": "Ödeme Takip",
+  "short_name": "Ödeme Takip",
+  "description": "Aylık gider ve ödeme takip uygulaması",
+  "start_url": "/Odeme-Takip-PWA/",
+  "scope": "/Odeme-Takip-PWA/",
+  "display": "standalone",
+  "background_color": "#F5F1E8",
+  "theme_color": "#1c1917",
+  "icons": [
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

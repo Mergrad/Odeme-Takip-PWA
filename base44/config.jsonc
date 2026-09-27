@@ -1,9 +1,0 @@
-{
-  "name": "\u00d6deme \u0130zleyici",
-  "site": {
-    "installCommand": "npm install",
-    "buildCommand": "npm run build",
-    "serveCommand": "npm run dev",
-    "outputDirectory": "./dist"
-  }
-}
